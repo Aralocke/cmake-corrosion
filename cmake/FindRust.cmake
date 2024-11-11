@@ -23,6 +23,14 @@ include(FindPackageHandleStandardArgs)
 
 list(APPEND CMAKE_MESSAGE_CONTEXT "FindRust")
 
+if(NOT DEFINED CARGO_HOME)
+	if("$ENV{CARGO_HOME}" STREQUAL "")
+		set(CARGO_HOME "${USER_HOME}/.cargo")
+	else()
+		set(CARGO_HOME "$ENV{CARGO_HOME}")
+	endif()
+endif()
+
 # Print error message and return. Should not be used from inside functions
 macro(_findrust_failed)
     if("${Rust_FIND_REQUIRED}")
@@ -224,7 +232,10 @@ set(Rust_RESOLVE_RUSTUP_TOOLCHAINS ON CACHE BOOL ${_RESOLVE_RUSTUP_TOOLCHAINS_DE
 # This block checks to see if we're prioritizing a rustup-managed toolchain.
 if (DEFINED Rust_TOOLCHAIN)
     # If the user specifies `Rust_TOOLCHAIN`, then look for `rustup` first, rather than `rustc`.
-    find_program(Rust_RUSTUP rustup PATHS "$ENV{HOME}/.cargo/bin")
+    find_program(Rust_RUSTUP rustup
+        HINTS "${CARGO_HOME}"
+        PATH_SUFFIXES "bin"
+    )
     if(NOT Rust_RUSTUP)
         if(NOT "${Rust_FIND_QUIETLY}")
             message(
@@ -253,7 +264,10 @@ else()
             return()
         endif()
     else()
-        find_program(_Rust_COMPILER_TEST rustc PATHS "$ENV{HOME}/.cargo/bin")
+        find_program(_Rust_COMPILER_TEST rustc
+            HINTS "${CARGO_HOME}"
+            PATH_SUFFIXES "bin"
+        )
         if(NOT EXISTS "${_Rust_COMPILER_TEST}")
             set(_ERROR_MESSAGE "`rustc` not found in PATH or `$ENV{HOME}/.cargo/bin`.\n"
                     "Hint: Check if `rustc` is in PATH or manually specify the location "
