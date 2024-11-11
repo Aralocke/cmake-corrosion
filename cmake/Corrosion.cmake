@@ -814,6 +814,7 @@ function(_add_cargo_build out_cargo_build_out_dir)
         COMMAND
             "${cargo_bin}" clean ${cargo_target_option}
             -p ${package_name} --manifest-path ${path_to_toml}
+            --target-dir "${cargo_build_dir}"
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}
         USES_TERMINAL
     )
